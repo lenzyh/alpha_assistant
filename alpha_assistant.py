@@ -157,22 +157,18 @@ if __name__ == "__main__":
     # Check if 'vs' exists in session state
     if 'vs' not in st.session_state:
         st.session_state.vs = None
-
+    
     # Check if 'messages' exists in session state, if not initialize it
     if 'messages' not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": "How can I help you?"}]
-
-    # # Check if 'k' exists in session state, if not initialize it
-    # if 'k' not in st.session_state:
-    #     st.session_state.k = None
-
+    
     # Display the chat messages
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
-
+    
     # User inputs a question at the bottom of the interface
     q = st.text_input('Ask a question about the content of your file:', key='user_input')
-
+    
     # Submit button
     if st.button('Submit'):
         if q:  # If the user entered a question and hit submit
@@ -182,18 +178,15 @@ if __name__ == "__main__":
             if st.session_state.vs:  # Check if the vector store exists
                 vector_store = st.session_state.vs
                 #st.write(f'k: {st.session_state.k}')  # Display the value of k from session state
-
+    
                 # Call your function to get the model's response
                 answer = ask_and_get_answer(vector_store, q, 3)
                 st.session_state.messages.append({"role": "assistant", "content": answer})
-
+    
                 # Clear the user input after submitting
                 #st.session_state.user_input = ""
-
+    
                 # Display the updated chat messages
                 st.text("")  # Spacer
                 for msg in st.session_state.messages:
                     st.chat_message(msg["role"]).write(msg["content"])
-
-    # run the app: streamlit run ./chat_with_documents.py
-
