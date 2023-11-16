@@ -1,6 +1,8 @@
 import streamlit as st
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
+import pandas as pd
+from datetime import datetime
 
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 # loading PDF, DOCX and TXT files as LangChain Documents
@@ -28,7 +30,7 @@ def load_document(file):
 
 
 # splitting data in chunks
-def chunk_data(data, chunk_size, chunk_overlap=20):
+def chunk_data(data, chunk_size=256, chunk_overlap=20):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     chunks = text_splitter.split_documents(data)
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     with st.sidebar:
         # text_input for the OpenAI API key (alternative to python-dotenv and .env)
         api_key = st.text_input('OpenAI API Key:', type='password')
-        MODEL_LIST = ["gpt-3.5-turbo","gpt-3.5-turbo-1106","gpt-4","gpt-4-1106-preview"]
+        MODEL_LIST = ["gpt-3.5-turbo","gpt-3.5-turbo-1106","gpt-4","gpt-4-1106-preview	"]
         MODEL = st.selectbox('Select Model :', MODEL_LIST)
         # file uploader widget
         uploaded_file = st.file_uploader('Upload a file:', type=['pdf', 'docx', 'txt'])
@@ -141,7 +143,7 @@ if __name__ == "__main__":
                     f.write(bytes_data)
 
                 data = load_document(file_name)
-                chunks = chunk_data(data, chunk_size)
+                chunks = chunk_data(data, chunk_size=chunk_size)
                 st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
                 tokens, embedding_cost = calculate_embedding_cost(chunks)
@@ -154,33 +156,25 @@ if __name__ == "__main__":
                 st.session_state.vs = vector_store
                 st.success('File uploaded, chunked and embedded successfully.')
 
+    # Check if 'vs' exists in session state
     if 'vs' not in st.session_state:
         st.session_state.vs = None
-    
-    # Check if 'messages' exists in session state, if not initialize it
-    if 'messages' not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "How can I help you?"}]
-    
-    # Display the chat messages at the top
+
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
-    
-    # User inputs a question at the bottom of the interface
-    q = st.text_input('Ask a question about the content of your file:', key='user_input')
-    
-    # Submit button
-    if st.button('Submit'):
-        if q:  # If the user entered a question and hit submit
-            # Display the user's question in the chat interface
-            st.session_state.messages.append({"role": "user", "content": q})
-            
-            if st.session_state.vs:  # Check if the vector store exists
-                vector_store = st.session_state.vs
-                #st.write(f'k: {st.session_state.k}')  # Display the value of k from session state
-    
-                # Call your function to get the model's response
-                answer = ask_and_get_answer(vector_store, q, 3)
-                st.session_state.messages.append({"role": "assistant", "content": answer})
-    
-    # Spacer
-    st.text("")
+
+    if prompt := st.chat_input():
+        if not api_key:
+            st.info("Please add your OpenAI API key to continue.")
+            st.stop()
+        
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.chat_message("user").write(prompt)
+        answer = ask_and_get_answer(st.session_state.vs, prompt, 3)
+        st.session_state.messages.append({"role": "assistant", "content": answer})
+        st.chat_message("assistant").write(answer)
+    # run the app: streamlit run ./chat_with_documents.py
+
