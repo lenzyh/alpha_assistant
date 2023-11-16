@@ -154,7 +154,6 @@ if __name__ == "__main__":
                 st.session_state.vs = vector_store
                 st.success('File uploaded, chunked and embedded successfully.')
 
-    # Check if 'vs' exists in session state
     if 'vs' not in st.session_state:
         st.session_state.vs = None
     
@@ -162,7 +161,11 @@ if __name__ == "__main__":
     if 'messages' not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": "How can I help you?"}]
     
-    # User inputs a question at the top of the interface
+    # Display the chat messages at the top
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
+    
+    # User inputs a question at the bottom of the interface
     q = st.text_input('Ask a question about the content of your file:', key='user_input')
     
     # Submit button
@@ -179,7 +182,5 @@ if __name__ == "__main__":
                 answer = ask_and_get_answer(vector_store, q, 3)
                 st.session_state.messages.append({"role": "assistant", "content": answer})
     
-    # Display the chat messages at the top
-    st.text("")  # Spacer
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).write(msg["content"])
+    # Spacer
+    st.text("")
