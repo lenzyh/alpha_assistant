@@ -1,0 +1,7 @@
+streamlit
+langchain
+openai
+pinecone
+tiktoken
+pandas
+numpy
