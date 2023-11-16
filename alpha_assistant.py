@@ -131,7 +131,7 @@ if __name__ == "__main__":
     with st.sidebar:
         # text_input for the OpenAI API key (alternative to python-dotenv and .env)
         api_key = st.text_input('OpenAI API Key:', type='password')
-        MODEL_LIST = ["gpt-3.5-turbo","gpt-3.5-turbo-1106","gpt-4","gpt-4-1106-preview	"]
+        MODEL_LIST = ["gpt-3.5-turbo","gpt-3.5-turbo-1106","gpt-4","gpt-4-1106-preview"]
         MODEL = st.selectbox('Select Model :', MODEL_LIST)
         # file uploader widget
         uploaded_file = st.file_uploader('Upload a file:', type=['pdf', 'docx', 'txt'])
