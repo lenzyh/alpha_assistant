@@ -188,7 +188,7 @@ if __name__ == "__main__":
                 st.session_state.messages.append({"role": "assistant", "content": answer})
 
                 # Clear the user input after submitting
-                st.session_state.user_input = ""
+                #st.session_state.user_input = ""
 
                 # Display the updated chat messages
                 st.text("")  # Spacer
