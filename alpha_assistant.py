@@ -162,11 +162,7 @@ if __name__ == "__main__":
     if 'messages' not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": "How can I help you?"}]
     
-    # Display the chat messages
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).write(msg["content"])
-    
-    # User inputs a question at the bottom of the interface
+    # User inputs a question at the top of the interface
     q = st.text_input('Ask a question about the content of your file:', key='user_input')
     
     # Submit button
@@ -183,10 +179,7 @@ if __name__ == "__main__":
                 answer = ask_and_get_answer(vector_store, q, 3)
                 st.session_state.messages.append({"role": "assistant", "content": answer})
     
-                # Clear the user input after submitting
-                #st.session_state.user_input = ""
-    
-                # Display the updated chat messages
-                st.text("")  # Spacer
-                for msg in st.session_state.messages:
-                    st.chat_message(msg["role"]).write(msg["content"])
+    # Display the chat messages at the top
+    st.text("")  # Spacer
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
