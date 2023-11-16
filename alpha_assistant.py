@@ -28,7 +28,7 @@ def load_document(file):
 
 
 # splitting data in chunks
-def chunk_data(data, chunk_size=256, chunk_overlap=20):
+def chunk_data(data, chunk_size, chunk_overlap=20):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     chunks = text_splitter.split_documents(data)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                     f.write(bytes_data)
 
                 data = load_document(file_name)
-                chunks = chunk_data(data, chunk_size=chunk_size)
+                chunks = chunk_data(data, chunk_size)
                 st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
                 tokens, embedding_cost = calculate_embedding_cost(chunks)
