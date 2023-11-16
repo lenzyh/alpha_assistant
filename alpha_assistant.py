@@ -80,7 +80,7 @@ def delete_pinecone_index(index_name='all'):
         pinecone.delete_index(index_name)
         print('Ok')
 
-def ask_and_get_answer(vector_store, q, k=3):
+def ask_and_get_answer(vector_store, q, k):
     from langchain.chains import RetrievalQA
     from langchain.chat_models import ChatOpenAI
 
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         chunk_size = st.number_input('Chunk size:', min_value=100, max_value=2048, value=512, on_change=clear_history)
 
         # k number input widget
-        k = st.number_input('k', min_value=1, max_value=20, value=3, on_change=clear_history)
+        #k = st.number_input('k', min_value=1, max_value=20, value=3, on_change=clear_history)
 
         # add data button widget
         add_data = st.button('Add Data', on_click=clear_history)
@@ -162,9 +162,9 @@ if __name__ == "__main__":
     if 'messages' not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": "How can I help you?"}]
 
-    # Check if 'k' exists in session state, if not initialize it
-    if 'k' not in st.session_state:
-        st.session_state.k = None
+    # # Check if 'k' exists in session state, if not initialize it
+    # if 'k' not in st.session_state:
+    #     st.session_state.k = None
 
     # Display the chat messages
     for msg in st.session_state.messages:
@@ -181,10 +181,10 @@ if __name__ == "__main__":
             
             if st.session_state.vs:  # Check if the vector store exists
                 vector_store = st.session_state.vs
-                st.write(f'k: {st.session_state.k}')  # Display the value of k from session state
+                #st.write(f'k: {st.session_state.k}')  # Display the value of k from session state
 
                 # Call your function to get the model's response
-                answer = ask_and_get_answer(vector_store, q, st.session_state.k)
+                answer = ask_and_get_answer(vector_store, q, 3)
                 st.session_state.messages.append({"role": "assistant", "content": answer})
 
                 # Clear the user input after submitting
