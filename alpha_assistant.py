@@ -4,6 +4,18 @@ from langchain.vectorstores import Pinecone
 import pandas as pd
 from datetime import datetime
 
+from databricks import sql
+import os
+
+connection = sql.connect(
+                        server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
+                        http_path = "/sql/1.0/warehouses/21491dc99c22a788",
+                        access_token = "dapic3e9dd1a6924fd69f15dd90f6c9c35d6")
+
+cursor = connection.cursor()
+cursor.execute("SELECT * from alpha_assistant.default.department_working_hours")
+data1=cursor.fetchall()
+
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 # loading PDF, DOCX and TXT files as LangChain Documents
 def load_document(file):
@@ -30,7 +42,7 @@ def load_document(file):
 
 
 # splitting data in chunks
-def chunk_data(data, chunk_size=256, chunk_overlap=20):
+def chunk_data(data, chunk_size, chunk_overlap=100):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     chunks = text_splitter.split_documents(data)
@@ -62,7 +74,7 @@ def insert_or_fetch_embeddings(index_name):
     else:
         print(f'Creating index {index_name} and embeddings ...', end='')
         pinecone.create_index(index_name, dimension=1536, metric='cosine')
-        vector_store = Pinecone.from_documents(chunks, embeddings, index_name=index_name)
+        vector_store = Pinecone.from_documents(chunks2, embeddings, index_name=index_name)
         print('Ok')
         
     return vector_store
@@ -142,8 +154,9 @@ if __name__ == "__main__":
                 with open(file_name, 'wb') as f:
                     f.write(bytes_data)
 
-                data = load_document(file_name)
-                chunks = chunk_data(data, chunk_size=chunk_size)
+                data2 = load_document(file_name)
+                chunks = chunk_data(data2, chunk_size=chunk_size)
+                chunks2=chunks+data1
                 st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
                 tokens, embedding_cost = calculate_embedding_cost(chunks)
@@ -173,7 +186,7 @@ if __name__ == "__main__":
         
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-        answer = ask_and_get_answer(st.session_state.vs, prompt, 3)
+        answer = ask_and_get_answer(st.session_state.vs, prompt, 5)
         st.session_state.messages.append({"role": "assistant", "content": answer})
         st.chat_message("assistant").write(answer)
     # run the app: streamlit run ./chat_with_documents.py
