@@ -13,9 +13,16 @@ connection = sql.connect(
                         access_token = "dapic3e9dd1a6924fd69f15dd90f6c9c35d6")
 
 cursor = connection.cursor()
-cursor.execute("SELECT * from alpha_assistant.default.department_working_hours")
+cursor.execute("SELECT * from alpha_assistant.default.company_events")
 data1=cursor.fetchall()
-
+cursor.execute("SELECT * from alpha_assistant.default.employee_attendance_report")
+data2=cursor.fetchall()
+cursor.execute("SELECT * from alpha_assistant.default.employee_info")
+data3=cursor.fetchall()
+cursor.execute("SELECT * from alpha_assistant.default.organizational_structure")
+data4=cursor.fetchall()
+cursor.execute("SELECT * from alpha_assistant.default.public_holidays")
+data5=cursor.fetchall()
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 # loading PDF, DOCX and TXT files as LangChain Documents
 def load_document(file):
@@ -159,7 +166,7 @@ if __name__ == "__main__":
 
                 data2 = load_document(file_name)
                 chunks = chunk_data(data2, chunk_size=chunk_size,chunk_overlap=chunk_overlap)
-                chunks2=chunks+data1
+                chunks2=chunks+data1+data2+data3+data4+data5
                 st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
                 tokens, embedding_cost = calculate_embedding_cost(chunks)
@@ -171,7 +178,8 @@ if __name__ == "__main__":
                 # saving the vector store in the streamlit session state (to be persistent between reruns)
                 st.session_state.vs = vector_store
                 st.success('File uploaded, chunked and embedded successfully.')
-
+                cursor.close()
+                connection.close()
     # Check if 'vs' exists in session state
     if 'vs' not in st.session_state:
         st.session_state.vs = None
@@ -189,8 +197,26 @@ if __name__ == "__main__":
         
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
         answer = ask_and_get_answer(st.session_state.vs, prompt, k)
         st.session_state.messages.append({"role": "assistant", "content": answer})
         st.chat_message("assistant").write(answer)
+        conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
+        result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
+
+        from databricks import sql
+        import os
+        
+        with sql.connect(server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
+                         http_path = "/sql/1.0/warehouses/21491dc99c22a788",
+                         access_token = "dapid039ed9f3529c6eaa50579c54a8d6814") as connection:
+        
+          with connection.cursor() as cursor:
+        
+            cursor.execute(f"INSERT INTO alpha_assistant.default.llm_model_request_history VALUES {result_tuple}")
+            cursor.close()
+            connection.close()
+      
+    
     # run the app: streamlit run ./chat_with_documents.py
 
