@@ -3,7 +3,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
 import pandas as pd
 from datetime import datetime
-
+from pyspark.sql import Row
 from databricks import sql
 import os
 
@@ -15,16 +15,28 @@ connection = sql.connect(
 cursor = connection.cursor()
 cursor.execute("SELECT * from alpha_assistant.default.company_events")
 data1=cursor.fetchall()
+description1 = 'training_events'
+Data1 = [Row(description=description, **row.asDict()) for row in data1]
 cursor.execute("SELECT * from alpha_assistant.default.employee_attendance_report")
 data2=cursor.fetchall()
+description2 = 'employee_attendance_report'
+Data2 = [Row(description=description, **row.asDict()) for row in data2]
 cursor.execute("SELECT * from alpha_assistant.default.employee_info")
 data3=cursor.fetchall()
+description3 = 'employee_info'
+Data3 = [Row(description=description, **row.asDict()) for row in data3]
 cursor.execute("SELECT * from alpha_assistant.default.organizational_structure")
 data4=cursor.fetchall()
+description4 = 'organizational_structure'
+Data4 = [Row(description=description, **row.asDict()) for row in data4]
 cursor.execute("SELECT * from alpha_assistant.default.public_holidays")
 data5=cursor.fetchall()
+description5 = 'public_holidays'
+Data5 = [Row(description=description, **row.asDict()) for row in data5]
 cursor.execute("SELECT * from alpha_assistant.default.llm_model_request_history")
 data6=cursor.fetchall()
+description6 = 'correct_respond_llm'
+Data6 = [Row(description=description, **row.asDict()) for row in data6]
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 # loading PDF, DOCX and TXT files as LangChain Documents
 def load_document(file):
@@ -166,9 +178,9 @@ if __name__ == "__main__":
                 with open(file_name, 'wb') as f:
                     f.write(bytes_data)
 
-                data2 = load_document(file_name)
-                chunks = chunk_data(data2, chunk_size=chunk_size,chunk_overlap=chunk_overlap)
-                chunks2=chunks+data1+data2+data3+data4+data5+data6
+                data_file = load_document(file_name)
+                chunks = chunk_data(data_file, chunk_size=chunk_size,chunk_overlap=chunk_overlap)
+                chunks2=chunks+Data1+Data2+Data3+Data4+Data5+Data6
                 st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
                 tokens, embedding_cost = calculate_embedding_cost(chunks)
