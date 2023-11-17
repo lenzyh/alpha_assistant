@@ -8,3 +8,4 @@ numpy
 docx2txt
 databricks-sql-connector
 pyspark
+pypdf
