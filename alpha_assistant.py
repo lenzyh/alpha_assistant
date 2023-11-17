@@ -214,8 +214,6 @@ if __name__ == "__main__":
           with connection.cursor() as cursor:
         
             cursor.execute(f"INSERT INTO alpha_assistant.default.llm_model_request_history VALUES {result_tuple}")
-            cursor.close()
-            connection.close()
       
     
     # run the app: streamlit run ./chat_with_documents.py
