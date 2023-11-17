@@ -42,7 +42,7 @@ def load_document(file):
 
 
 # splitting data in chunks
-def chunk_data(data, chunk_size, chunk_overlap=50):
+def chunk_data(data, chunk_size, chunk_overlap):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     chunks = text_splitter.split_documents(data)
@@ -140,9 +140,10 @@ if __name__ == "__main__":
 
         # chunk size number widget
         chunk_size = st.number_input('Chunk size:', min_value=100, max_value=2048, value=512, on_change=clear_history)
+        chunk_overlap = st.number_input('Chunk Overlap:', min_value=100, max_value=1000, value=100, on_change=clear_history)
 
         # k number input widget
-        #k = st.number_input('k', min_value=1, max_value=20, value=3, on_change=clear_history)
+        k = st.number_input('k', min_value=1, max_value=20, value=3, on_change=clear_history)
 
         # add data button widget
         add_data = st.button('Add Data', on_click=clear_history)
@@ -157,7 +158,7 @@ if __name__ == "__main__":
                     f.write(bytes_data)
 
                 data2 = load_document(file_name)
-                chunks = chunk_data(data2, chunk_size=chunk_size)
+                chunks = chunk_data(data2, chunk_size=chunk_size,chunk_overlap=chunk_overlap)
                 chunks2=chunks+data1
                 st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
@@ -188,7 +189,7 @@ if __name__ == "__main__":
         
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-        answer = ask_and_get_answer(st.session_state.vs, prompt, 3)
+        answer = ask_and_get_answer(st.session_state.vs, prompt, k)
         st.session_state.messages.append({"role": "assistant", "content": answer})
         st.chat_message("assistant").write(answer)
     # run the app: streamlit run ./chat_with_documents.py
