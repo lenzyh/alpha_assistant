@@ -42,7 +42,7 @@ def load_document(file):
 
 
 # splitting data in chunks
-def chunk_data(data, chunk_size, chunk_overlap=100):
+def chunk_data(data, chunk_size, chunk_overlap=50):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     chunks = text_splitter.split_documents(data)
@@ -188,7 +188,7 @@ if __name__ == "__main__":
         
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
-        answer = ask_and_get_answer(st.session_state.vs, prompt, 5)
+        answer = ask_and_get_answer(st.session_state.vs, prompt, 3)
         st.session_state.messages.append({"role": "assistant", "content": answer})
         st.chat_message("assistant").write(answer)
     # run the app: streamlit run ./chat_with_documents.py
