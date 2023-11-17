@@ -148,7 +148,7 @@ if __name__ == "__main__":
         # chunk size number widget
         chunk_size = st.number_input('Chunk size:', min_value=100, max_value=2048, value=512, on_change=clear_history)
         chunk_overlap = st.number_input('Chunk Overlap:', min_value=100, max_value=1000, value=100, on_change=clear_history)
-        temperature = st.number_input('Temperature:', min_value=0, max_value=1, step=0.1, on_change=clear_history)
+        temperature = st.number_input('Temperature:', min_value=0.0, max_value=1.0,value=0.7,step=0.1, on_change=clear_history)
         # k number input widget
         k = st.number_input('k', min_value=1, max_value=20, value=3, on_change=clear_history)
 
