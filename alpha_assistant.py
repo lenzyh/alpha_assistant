@@ -23,6 +23,8 @@ cursor.execute("SELECT * from alpha_assistant.default.organizational_structure")
 data4=cursor.fetchall()
 cursor.execute("SELECT * from alpha_assistant.default.public_holidays")
 data5=cursor.fetchall()
+cursor.execute("SELECT * from alpha_assistant.default.llm_model_request_history")
+data6=cursor.fetchall()
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 # loading PDF, DOCX and TXT files as LangChain Documents
 def load_document(file):
@@ -166,7 +168,7 @@ if __name__ == "__main__":
 
                 data2 = load_document(file_name)
                 chunks = chunk_data(data2, chunk_size=chunk_size,chunk_overlap=chunk_overlap)
-                chunks2=chunks+data1+data2+data3+data4+data5
+                chunks2=chunks+data1+data2+data3+data4+data5+data6
                 st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
                 tokens, embedding_cost = calculate_embedding_cost(chunks)
