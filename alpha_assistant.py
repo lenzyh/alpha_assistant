@@ -105,7 +105,7 @@ def ask_and_get_answer(vector_store, q, k):
     from langchain.chains import RetrievalQA
     from langchain.chat_models import ChatOpenAI
 
-    llm = ChatOpenAI(model=MODEL, openai_api_key=api_key ,temperature=1)
+    llm = ChatOpenAI(model=MODEL, openai_api_key=api_key ,temperature=temperature)
     retriever = vector_store.as_retriever(search_type='similarity', search_kwargs={'k': k})
     chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         # chunk size number widget
         chunk_size = st.number_input('Chunk size:', min_value=100, max_value=2048, value=512, on_change=clear_history)
         chunk_overlap = st.number_input('Chunk Overlap:', min_value=100, max_value=1000, value=100, on_change=clear_history)
-
+        temperature = st.number_input('Temperature:', min_value=0, max_value=1, value=0.7, on_change=clear_history)
         # k number input widget
         k = st.number_input('k', min_value=1, max_value=20, value=3, on_change=clear_history)
 
