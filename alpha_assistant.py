@@ -16,27 +16,27 @@ cursor = connection.cursor()
 cursor.execute("SELECT * from alpha_assistant.default.company_events")
 data1=cursor.fetchall()
 description1 = 'training_events'
-Data1 = [Row(description=description, **row.asDict()) for row in data1]
+Data1 = [Row(description=description1, **row.asDict()) for row in data1]
 cursor.execute("SELECT * from alpha_assistant.default.employee_attendance_report")
 data2=cursor.fetchall()
 description2 = 'employee_attendance_report'
-Data2 = [Row(description=description, **row.asDict()) for row in data2]
+Data2 = [Row(description=description2, **row.asDict()) for row in data2]
 cursor.execute("SELECT * from alpha_assistant.default.employee_info")
 data3=cursor.fetchall()
 description3 = 'employee_info'
-Data3 = [Row(description=description, **row.asDict()) for row in data3]
+Data3 = [Row(description=description3, **row.asDict()) for row in data3]
 cursor.execute("SELECT * from alpha_assistant.default.organizational_structure")
 data4=cursor.fetchall()
 description4 = 'organizational_structure'
-Data4 = [Row(description=description, **row.asDict()) for row in data4]
+Data4 = [Row(description=description4, **row.asDict()) for row in data4]
 cursor.execute("SELECT * from alpha_assistant.default.public_holidays")
 data5=cursor.fetchall()
 description5 = 'public_holidays'
-Data5 = [Row(description=description, **row.asDict()) for row in data5]
+Data5 = [Row(description=description5, **row.asDict()) for row in data5]
 cursor.execute("SELECT * from alpha_assistant.default.llm_model_request_history")
 data6=cursor.fetchall()
 description6 = 'correct_respond_llm'
-Data6 = [Row(description=description, **row.asDict()) for row in data6]
+Data6 = [Row(description=description6, **row.asDict()) for row in data6]
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 # loading PDF, DOCX and TXT files as LangChain Documents
 def load_document(file):
