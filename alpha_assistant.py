@@ -141,7 +141,8 @@ def calculate_embedding_cost(texts):
 def clear_history():
     if 'history' in st.session_state:
         del st.session_state['history']
-
+if 'messages' not in st.session_state:
+    st.session_state.messages = []
 
 if __name__ == "__main__":
     import os
@@ -149,86 +150,125 @@ if __name__ == "__main__":
     # loading the OpenAI api key from .env
 
     st.subheader('Alpha Assistant 🤖')
+    #st.session_state["messages"] = [{"role": "assistant", "content": "Please select the model you want in the sidebar after keyin API key"}]
     with st.sidebar:
         # text_input for the OpenAI API key (alternative to python-dotenv and .env)
         api_key = st.text_input('OpenAI API Key:', type='password')
         if not api_key:
           st.warning("Please input your OpenAI API key.")
-        MODEL_LIST = ["gpt-3.5-turbo","gpt-3.5-turbo-1106","gpt-4","gpt-4-1106-preview"]
+        MODEL_LIST = ["gpt-3.5-turbo","gpt-4-1106-preview","AlphaGPT"]
         MODEL = st.selectbox('Select Model :', MODEL_LIST)
+        if MODEL != "AlphaGPT":
         # file uploader widget
-        uploaded_file = st.file_uploader('Upload a file:', type=['pdf', 'docx', 'txt'])
+            uploaded_file = st.file_uploader('Upload a file:', type=['pdf', 'docx', 'txt'])
 
-        # chunk size number widget
-        chunk_size = st.number_input('Chunk size:', min_value=100, max_value=2048, value=512, on_change=clear_history)
-        chunk_overlap = st.number_input('Chunk Overlap:', min_value=100, max_value=1000, value=100, on_change=clear_history)
-        temperature = st.number_input('Temperature:', min_value=0.0, max_value=1.0,value=0.7,step=0.1, on_change=clear_history)
-        # k number input widget
-        k = st.number_input('k', min_value=1, max_value=20, value=3, on_change=clear_history)
+            # chunk size number widget
+            chunk_size = st.number_input('Chunk size:', min_value=100, max_value=2048, value=512, on_change=clear_history)
+            chunk_overlap = st.number_input('Chunk Overlap:', min_value=100, max_value=1000, value=100, on_change=clear_history)
+            temperature = st.number_input('Temperature:', min_value=0.0, max_value=1.0,value=0.7,step=0.1, on_change=clear_history)
+            # k number input widget
+            k = st.number_input('k', min_value=1, max_value=20, value=3, on_change=clear_history)
 
-        # add data button widget
-        add_data = st.button('Add Data', on_click=clear_history)
+            # add data button widget
+            add_data = st.button('Add Data', on_click=clear_history)
 
-        if uploaded_file and add_data: # if the user browsed a file
-            with st.spinner('Reading, chunking and embedding file ...'):
+            if uploaded_file and add_data: # if the user browsed a file
+                with st.spinner('Reading, chunking and embedding file ...'):
 
-                # writing the file from RAM to the current directory on disk
-                bytes_data = uploaded_file.read()
-                file_name = os.path.join('./', uploaded_file.name)
-                with open(file_name, 'wb') as f:
-                    f.write(bytes_data)
+                    # writing the file from RAM to the current directory on disk
+                    bytes_data = uploaded_file.read()
+                    file_name = os.path.join('./', uploaded_file.name)
+                    with open(file_name, 'wb') as f:
+                        f.write(bytes_data)
 
-                data_file = load_document(file_name)
-                chunks = chunk_data(data_file, chunk_size=chunk_size,chunk_overlap=chunk_overlap)
-                chunks2=chunks+Data1+Data2+Data3+Data4+Data5+Data6
-                st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
+                    data_file = load_document(file_name)
+                    chunks = chunk_data(data_file, chunk_size=chunk_size,chunk_overlap=chunk_overlap)
+                    chunks2=chunks+Data1+Data2+Data3+Data4+Data5+Data6
+                    st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
 
-                tokens, embedding_cost = calculate_embedding_cost(chunks)
-                st.write(f'Embedding cost: ${embedding_cost:.4f}')
-                index_name = 'askadocument'
-                # creating the embeddings and returning the Chroma vector store
-                vector_store = insert_or_fetch_embeddings(index_name)
+                    tokens, embedding_cost = calculate_embedding_cost(chunks)
+                    st.write(f'Embedding cost: ${embedding_cost:.4f}')
+                    index_name = 'askadocument'
+                    # creating the embeddings and returning the Chroma vector store
+                    vector_store = insert_or_fetch_embeddings(index_name)
 
-                # saving the vector store in the streamlit session state (to be persistent between reruns)
-                st.session_state.vs = vector_store
-                st.success('File uploaded, chunked and embedded successfully.')
-                cursor.close()
-                connection.close()
-    # Check if 'vs' exists in session state
-    if 'vs' not in st.session_state:
-        st.session_state.vs = None
-
-    if "messages" not in st.session_state:
-        st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+                    # saving the vector store in the streamlit session state (to be persistent between reruns)
+                    st.session_state.vs = vector_store
+                    st.success('File uploaded, chunked and embedded successfully.')
+                    cursor.close()
+                    connection.close()
+    # Check if 'vs' exists in session stat
 
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
+    if MODEL != 'AlphaGPT':
+        st.write(f"MODEL selected is {MODEL}")
+        with st.chat_message("assistant"):
+            st.write("Hello, how can I assist you?")
+        if prompt := st.chat_input():
+            if not api_key:
+                st.info("Please add your OpenAI API key to continue.")
+                st.stop()
+            
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.chat_message("user").write(prompt)
+            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
+            answer = ask_and_get_answer(st.session_state.vs, prompt, k)
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+            st.chat_message("assistant").write(answer)
+            conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
+            result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
 
-    if prompt := st.chat_input():
-        if not api_key:
-            st.info("Please add your OpenAI API key to continue.")
-            st.stop()
-        
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        st.chat_message("user").write(prompt)
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
-        answer = ask_and_get_answer(st.session_state.vs, prompt, k)
-        st.session_state.messages.append({"role": "assistant", "content": answer})
-        st.chat_message("assistant").write(answer)
-        conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
-        result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
+            from databricks import sql
+            import os
+            
+            with sql.connect(server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
+                            http_path = "/sql/1.0/warehouses/21491dc99c22a788",
+                            access_token = "dapid039ed9f3529c6eaa50579c54a8d6814") as connection:
+            
+                with connection.cursor() as cursor:
+            
+                    cursor.execute(f"INSERT INTO alpha_assistant.default.llm_model_request_history VALUES {result_tuple}")
+    else:
+        uri = (
+            "databricks://token:dapic3e9dd1a6924fd69f15dd90f6c9c35d6@dbc-eb788f31-6c73.cloud.databricks.com?"
+            "http_path=/sql/1.0/warehouses/21491dc99c22a788&catalog=alpha_assistant&schema=default"
+        )
+        from langchain.llms import OpenAI
+        from langchain.utilities import SQLDatabase
+        from langchain_experimental.sql import SQLDatabaseChain
+        st.write(f"MODEL selected is {MODEL}")
+        with st.chat_message("assistant"):
+            st.write("Hello, how can I assist you?")
+        for msg in st.session_state.messages:
+            st.chat_message(msg["role"]).write(msg["content"])
 
-        from databricks import sql
-        import os
-        
-        with sql.connect(server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
-                         http_path = "/sql/1.0/warehouses/21491dc99c22a788",
-                         access_token = "dapid039ed9f3529c6eaa50579c54a8d6814") as connection:
-        
-          with connection.cursor() as cursor:
-        
-            cursor.execute(f"INSERT INTO alpha_assistant.default.llm_model_request_history VALUES {result_tuple}")
-      
-    
-    # run the app: streamlit run ./chat_with_documents.py
+        if prompt := st.chat_input():
+            if not api_key:
+                st.info("Please add your OpenAI API key to continue.")
+                st.stop()
+            
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.chat_message("user").write(prompt)
+            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
+            db = SQLDatabase.from_uri(uri)
+            llm = OpenAI(openai_api_key=api_key,temperature=0, verbose=True)
+            db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
+            answer = db_chain.run(prompt)     
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+            st.chat_message("assistant").write(answer)
+            conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
+            result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
 
+            from databricks import sql
+            import os
+            
+            with sql.connect(server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
+                            http_path = "/sql/1.0/warehouses/21491dc99c22a788",
+                            access_token = "dapid039ed9f3529c6eaa50579c54a8d6814") as connection:
+            
+                with connection.cursor() as cursor:
+            
+                    cursor.execute(f"INSERT INTO alpha_assistant.default.llm_model_request_history VALUES {result_tuple}")
+
+# run the app: streamlit run ./chat_with_documents.py
