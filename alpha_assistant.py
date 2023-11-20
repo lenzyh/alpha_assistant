@@ -198,7 +198,6 @@ if __name__ == "__main__":
                 st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
         else:
             with st.spinner("Thinking..."):
-                llm = OpenAI(openai_api_key=api_key,temperature=0, verbose=True)
                 db_chain = SQLDatabaseChain.from_llm(ChatOpenAI(temperature=0.7, verbose=True,model_name='gpt-3.5-turbo'), db)
                 answer = db_chain.run(prompt)
             if answer is None or not answer.strip():
