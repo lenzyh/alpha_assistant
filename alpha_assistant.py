@@ -131,6 +131,7 @@ if __name__ == "__main__":
     with st.sidebar:
         # text_input for the OpenAI API key (alternative to python-dotenv and .env)
         api_key = st.text_input('OpenAI API Key:', type='password')
+        OPENAI_API_KEY = api_key
         if not api_key:
           st.warning("Please input your OpenAI API key.")
         MODEL_LIST = ["gpt-3.5-turbo","gpt-4-1106-preview","AlphaGPT"]
