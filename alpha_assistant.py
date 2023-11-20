@@ -6,8 +6,17 @@ from datetime import datetime
 from pyspark.sql import Row
 from databricks import sql
 import os
+from langchain.llms import OpenAI
+from langchain.utilities import SQLDatabase
+from langchain_experimental.sql import SQLDatabaseChain
 
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
+uri = (
+    "databricks://token:dapic3e9dd1a6924fd69f15dd90f6c9c35d6@dbc-eb788f31-6c73.cloud.databricks.com?"
+    "http_path=/sql/1.0/warehouses/21491dc99c22a788&catalog=alpha_assistant&schema=default"
+)
+db = SQLDatabase.from_uri(uri)
+
 # loading PDF, DOCX and TXT files as LangChain Documents
 def load_document(file):
     import os
@@ -111,8 +120,7 @@ def calculate_embedding_cost(texts):
 def clear_history():
     if 'history' in st.session_state:
         del st.session_state['history']
-if 'messages' not in st.session_state:
-    st.session_state.messages = []
+
 
 if __name__ == "__main__":
     import os
@@ -120,8 +128,6 @@ if __name__ == "__main__":
     # loading the OpenAI api key from .env
 
     st.subheader('Alpha Assistant 🤖')
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
     with st.sidebar:
         # text_input for the OpenAI API key (alternative to python-dotenv and .env)
         api_key = st.text_input('OpenAI API Key:', type='password')
@@ -129,6 +135,7 @@ if __name__ == "__main__":
           st.warning("Please input your OpenAI API key.")
         MODEL_LIST = ["gpt-3.5-turbo","gpt-4-1106-preview","AlphaGPT"]
         MODEL = st.selectbox('Select Model :', MODEL_LIST)
+
         if MODEL != "AlphaGPT":
         # file uploader widget
             uploaded_file = st.file_uploader('Upload a file:', type=['pdf', 'docx', 'txt'])
@@ -165,88 +172,53 @@ if __name__ == "__main__":
                     # saving the vector store in the streamlit session state (to be persistent between reruns)
                     st.session_state.vs = vector_store
                     st.success('File uploaded, chunked and embedded successfully.')
-    # Check if 'vs' exists in session stat
+
+    # Check if 'vs' exists in session state
+    if 'vs' not in st.session_state:
+        st.session_state.vs = None
+
+    if "messages" not in st.session_state:
+        st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
     for msg in st.session_state.messages:
         st.chat_message(msg["role"]).write(msg["content"])
-    if MODEL != 'AlphaGPT':
-        st.write(f"MODEL selected is {MODEL}")
-        with st.chat_message("assistant"):
-            st.write("Hello, how can I assist you?")
-        if prompt := st.chat_input():
-            if not api_key:
-                st.info("Please add your OpenAI API key to continue.")
-                st.stop()
-            
-            user_message = {"role": "user", "content": prompt}
-            st.session_state.messages.append(user_message)
-            st.chat_message("user").write(prompt)
-            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
+
+    if prompt := st.chat_input():
+        if not api_key:
+            st.info("Please add your OpenAI API key to continue.")
+            st.stop()
+        
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.chat_message("user").write(prompt)
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
+        if MODEL !='AlphaGPT':
             with st.spinner("Thinking..."):
                 answer = ask_and_get_answer(st.session_state.vs, prompt, k)
             if answer is None or not answer.strip():
                 st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
-            else:
-                assistant_message = {"role": "assistant", "content": answer}
-                st.session_state.messages.append(assistant_message)
-                st.chat_message("assistant").write(answer)
-            conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
-            result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
-
-            from databricks import sql
-            import os
-            
-            with sql.connect(server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
-                            http_path = "/sql/1.0/warehouses/21491dc99c22a788",
-                            access_token = "dapid039ed9f3529c6eaa50579c54a8d6814") as connection:
-            
-                with connection.cursor() as cursor:
-            
-                    cursor.execute(f"INSERT INTO alpha_assistant.default.llm_model_request_history VALUES {result_tuple}")
-    else:
-        uri = (
-            "databricks://token:dapic3e9dd1a6924fd69f15dd90f6c9c35d6@dbc-eb788f31-6c73.cloud.databricks.com?"
-            "http_path=/sql/1.0/warehouses/21491dc99c22a788&catalog=alpha_assistant&schema=default"
-        )
-        from langchain.llms import OpenAI
-        from langchain.utilities import SQLDatabase
-        from langchain_experimental.sql import SQLDatabaseChain
-        st.write(f"MODEL selected is {MODEL}")
-        with st.chat_message("assistant"):
-            st.write("Hello, how can I assist you?")
-
-        if prompt := st.chat_input():
-            if not api_key:
-                st.info("Please add your OpenAI API key to continue.")
-                st.stop()
-            
-            user_message = {"role": "user", "content": prompt}
-            st.session_state.messages.append(user_message)
-            st.chat_message("user").write(prompt)
-            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
-            db = SQLDatabase.from_uri(uri)
-            llm = OpenAI(openai_api_key=api_key,temperature=0, verbose=True)
-            db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
+        else:
             with st.spinner("Thinking..."):
+                llm = OpenAI(openai_api_key=api_key,temperature=0, verbose=True)
+                db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
                 answer = db_chain.run(prompt)
             if answer is None or not answer.strip():
                 st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
-            else:
-                assistant_message = {"role": "assistant", "content": answer}
-                st.session_state.messages.append(assistant_message)
-                st.chat_message("assistant").write(answer)
-            conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
-            result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
+        st.session_state.messages.append({"role": "assistant", "content": answer})
+        st.chat_message("assistant").write(answer)
+        conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
+        result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
 
-            from databricks import sql
-            import os
-            
-            with sql.connect(server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
-                            http_path = "/sql/1.0/warehouses/21491dc99c22a788",
-                            access_token = "dapid039ed9f3529c6eaa50579c54a8d6814") as connection:
-            
-                with connection.cursor() as cursor:
-            
-                    cursor.execute(f"INSERT INTO alpha_assistant.llm_chat_history.llm_model_request_history VALUES {result_tuple}")
+        from databricks import sql
+        import os
+        
+        with sql.connect(server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
+                         http_path = "/sql/1.0/warehouses/21491dc99c22a788",
+                         access_token = "dapid039ed9f3529c6eaa50579c54a8d6814") as connection:
+        
+          with connection.cursor() as cursor:
+        
+            cursor.execute(f"INSERT INTO alpha_assistant.llm_chat_history.llm_model_request_history VALUES {result_tuple}")
+      
+    
+    # run the app: streamlit run ./chat_with_documents.py
 
-# run the app: streamlit run ./chat_with_documents.py
