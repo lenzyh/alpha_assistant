@@ -165,8 +165,6 @@ if __name__ == "__main__":
                     # saving the vector store in the streamlit session state (to be persistent between reruns)
                     st.session_state.vs = vector_store
                     st.success('File uploaded, chunked and embedded successfully.')
-                    cursor.close()
-                    connection.close()
     # Check if 'vs' exists in session stat
 
     for msg in st.session_state.messages:
