@@ -9,4 +9,4 @@ docx2txt
 databricks-sql-connector
 pyspark
 pypdf
-langchain_experimental
+langchain-experimental
