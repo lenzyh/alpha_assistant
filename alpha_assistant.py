@@ -233,7 +233,6 @@ if __name__ == "__main__":
                 st.session_state.messages.append({"role": "assistant", "content": answer})
                 st.chat_message("assistant").write(answer)
             st.session_state.messages.append({"role": "assistant", "content": answer})
-            st.chat_message("assistant").write(answer)
             conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
             result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
 
