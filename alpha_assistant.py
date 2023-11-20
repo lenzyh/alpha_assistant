@@ -120,7 +120,8 @@ if __name__ == "__main__":
     # loading the OpenAI api key from .env
 
     st.subheader('Alpha Assistant 🤖')
-    #st.session_state["messages"] = [{"role": "assistant", "content": "Please select the model you want in the sidebar after keyin API key"}]
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
     with st.sidebar:
         # text_input for the OpenAI API key (alternative to python-dotenv and .env)
         api_key = st.text_input('OpenAI API Key:', type='password')
@@ -179,7 +180,8 @@ if __name__ == "__main__":
                 st.info("Please add your OpenAI API key to continue.")
                 st.stop()
             
-            st.session_state.messages.append({"role": "user", "content": prompt})
+            user_message = {"role": "user", "content": prompt}
+            st.session_state.messages.append(user_message)
             st.chat_message("user").write(prompt)
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
             with st.spinner("Thinking..."):
@@ -187,7 +189,8 @@ if __name__ == "__main__":
             if answer is None or not answer.strip():
                 st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
             else:
-                st.session_state.messages.append({"role": "assistant", "content": answer})
+                assistant_message = {"role": "assistant", "content": answer}
+                st.session_state.messages.append(assistant_message)
                 st.chat_message("assistant").write(answer)
             conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
             result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
@@ -219,7 +222,8 @@ if __name__ == "__main__":
                 st.info("Please add your OpenAI API key to continue.")
                 st.stop()
             
-            st.session_state.messages.append({"role": "user", "content": prompt})
+            user_message = {"role": "user", "content": prompt}
+            st.session_state.messages.append(user_message)
             st.chat_message("user").write(prompt)
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
             db = SQLDatabase.from_uri(uri)
@@ -230,9 +234,9 @@ if __name__ == "__main__":
             if answer is None or not answer.strip():
                 st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
             else:
-                st.session_state.messages.append({"role": "assistant", "content": answer})
+                assistant_message = {"role": "assistant", "content": answer}
+                st.session_state.messages.append(assistant_message)
                 st.chat_message("assistant").write(answer)
-            st.session_state.messages.append({"role": "assistant", "content": answer})
             conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
             result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
 
