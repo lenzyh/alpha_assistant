@@ -6,9 +6,9 @@ from datetime import datetime
 from pyspark.sql import Row
 from databricks import sql
 import os
-from langchain.llms import OpenAI
-from langchain.utilities import SQLDatabase
 from langchain_experimental.sql import SQLDatabaseChain
+from langchain.utilities import SQLDatabase
+from langchain.chat_models import ChatOpenAI
 
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 uri = (
@@ -199,7 +199,7 @@ if __name__ == "__main__":
         else:
             with st.spinner("Thinking..."):
                 llm = OpenAI(openai_api_key=api_key,temperature=0, verbose=True)
-                db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
+                db_chain = SQLDatabaseChain.from_llm(ChatOpenAI(temperature=0.7, verbose=True,model_name='gpt-3.5-turbo'), db)
                 answer = db_chain.run(prompt)
             if answer is None or not answer.strip():
                 st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
