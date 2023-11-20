@@ -182,9 +182,13 @@ if __name__ == "__main__":
             st.session_state.messages.append({"role": "user", "content": prompt})
             st.chat_message("user").write(prompt)
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S:%f")
-            answer = ask_and_get_answer(st.session_state.vs, prompt, k)
-            st.session_state.messages.append({"role": "assistant", "content": answer})
-            st.chat_message("assistant").write(answer)
+            with st.spinner("Thinking..."):
+                answer = ask_and_get_answer(st.session_state.vs, prompt, k)
+            if answer is None or not answer.strip():
+                st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
+            else:
+                st.session_state.messages.append({"role": "assistant", "content": answer})
+                st.chat_message("assistant").write(answer)
             conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
             result_tuple = (conversation_history['datetime'], conversation_history['input'], conversation_history['response'])
 
@@ -221,7 +225,13 @@ if __name__ == "__main__":
             db = SQLDatabase.from_uri(uri)
             llm = OpenAI(openai_api_key=api_key,temperature=0, verbose=True)
             db_chain = SQLDatabaseChain.from_llm(llm, db, verbose=True)
-            answer = db_chain.run(prompt)     
+            with st.spinner("Thinking..."):
+                answer = db_chain.run(prompt)
+            if answer is None or not answer.strip():
+                st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
+            else:
+                st.session_state.messages.append({"role": "assistant", "content": answer})
+                st.chat_message("assistant").write(answer)
             st.session_state.messages.append({"role": "assistant", "content": answer})
             st.chat_message("assistant").write(answer)
             conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
