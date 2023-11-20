@@ -133,7 +133,7 @@ if __name__ == "__main__":
         api_key = st.text_input('OpenAI API Key:', type='password')
         if not api_key:
           st.warning("Please input your OpenAI API key.")
-        MODEL_LIST = ["gpt-3.5-turbo","gpt-4-1106-preview","AlphaGPT"]
+        MODEL_LIST = ["AlphaGPT","gpt-3.5-turbo","gpt-4-1106-preview"]
         MODEL = st.selectbox('Select Model :', MODEL_LIST)
 
         if MODEL != "AlphaGPT":
