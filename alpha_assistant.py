@@ -165,10 +165,11 @@ if __name__ == "__main__":
                     data_file = load_document(file_name)
                     chunks = chunk_data(data_file, chunk_size=chunk_size,chunk_overlap=chunk_overlap)
                     st.write(f'Chunk size: {chunk_size}, Chunks: {len(chunks)}')
-
+        
                     tokens, embedding_cost = calculate_embedding_cost(chunks)
                     st.write(f'Embedding cost: ${embedding_cost:.4f}')
                     index_name = 'askadocument'
+                    delete_pinecone_index(index_name='all')
                     # creating the embeddings and returning the Chroma vector store
                     vector_store = insert_or_fetch_embeddings(index_name)
 
