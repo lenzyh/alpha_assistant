@@ -98,7 +98,7 @@ def ask_and_get_answer(vector_store, q, k):
     from langchain.chains import RetrievalQA
     from langchain.chat_models import ChatOpenAI
 
-    llm = ChatOpenAI(model=MODEL, openai_api_key=api_key ,temperature=temperature)
+    llm = ChatOpenAI(model=model, openai_api_key=api_key ,temperature=temperature)
     retriever = vector_store.as_retriever(search_type='similarity', search_kwargs={'k': k})
     chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
 
@@ -133,9 +133,13 @@ if __name__ == "__main__":
         api_key = st.text_input('OpenAI API Key:', type='password')
         if not api_key:
           st.warning("Please input your OpenAI API key.")
+        MODEL_LIST = ["AlphaGPT","AlphaJunior","AlphaSenior"]
         MODEL_LIST = ["AlphaGPT","gpt-3.5-turbo-1106","gpt-4-1106-preview"]
         MODEL = st.selectbox('Select Model :', MODEL_LIST)
-
+        if MODEL == "AlphaJunior":
+            model = "gpt-3.5-turbo-1106"
+        if MODEL == "AlphaSenior":
+            model = "gpt-4-1106-preview"
         if MODEL != "AlphaGPT":
         # file uploader widget
             uploaded_file = st.file_uploader('Upload a file:', type=['pdf', 'docx', 'txt'])
