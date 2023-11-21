@@ -172,12 +172,12 @@ if __name__ == "__main__":
                     # saving the vector store in the streamlit session state (to be persistent between reruns)
                     st.session_state.vs = vector_store
                     st.success('File uploaded, chunked and embedded successfully.')
-        if MODEL = "AlphaGPT":
+        if MODEL == "AlphaGPT":
             VARIANCE_LIST = ["SmartSaver","PerformancePlus"]
             VARIANCE = st.sidebar.selectbox('Select Variance :', VARIANCE_LIST)
-            if VARIANCE ="SmartSaver":
+            if VARIANCE =="SmartSaver":
                 model_name='gpt-3.5-turbo'
-            if VARIANCE ="PerformancePlus":
+            if VARIANCE =="PerformancePlus":
                 model_name='gpt-4-1106-preview'
             temperature = st.sidebar.number_input('Temperature:', min_value=0.0, max_value=1.0,value=0.7,step=0.1, on_change=clear_history)
 
