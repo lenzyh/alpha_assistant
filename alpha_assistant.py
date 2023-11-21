@@ -134,7 +134,6 @@ if __name__ == "__main__":
         if not api_key:
           st.warning("Please input your OpenAI API key.")
         MODEL_LIST = ["AlphaGPT","AlphaJunior","AlphaSenior"]
-        MODEL_LIST = ["AlphaGPT","gpt-3.5-turbo-1106","gpt-4-1106-preview"]
         MODEL = st.selectbox('Select Model :', MODEL_LIST)
         if MODEL == "AlphaJunior":
             model = "gpt-3.5-turbo-1106"
