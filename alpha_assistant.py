@@ -172,6 +172,14 @@ if __name__ == "__main__":
                     # saving the vector store in the streamlit session state (to be persistent between reruns)
                     st.session_state.vs = vector_store
                     st.success('File uploaded, chunked and embedded successfully.')
+        if MODEL = "AlphaGPT":
+            VARIANCE_LIST = ["SmartSaver","PerformancePlus"]
+            VARIANCE = st.selectbox('Select Variance :', VARIANCE_LIST)
+            if VARIANCE ="SmartSaver":
+                model_name='gpt-3.5-turbo'
+            if VARIANCE ="PerformancePlus":
+                model_name='gpt-4-1106-preview'
+            temperature = st.number_input('Temperature:', min_value=0.0, max_value=1.0,value=0.7,step=0.1, on_change=clear_history)
 
     # Check if 'vs' exists in session state
     if 'vs' not in st.session_state:
@@ -198,7 +206,7 @@ if __name__ == "__main__":
                 st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
         else:
             with st.spinner("Thinking..."):
-                db_chain = SQLDatabaseChain.from_llm(ChatOpenAI(openai_api_key=api_key,temperature=0.7, verbose=True,model_name='gpt-3.5-turbo'), db)
+                db_chain = SQLDatabaseChain.from_llm(ChatOpenAI(openai_api_key=api_key,temperature=temperature, verbose=True,model_name=model_name), db)
                 answer = db_chain.run(prompt)
             if answer is None or not answer.strip():
                 st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
