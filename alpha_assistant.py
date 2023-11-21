@@ -174,12 +174,12 @@ if __name__ == "__main__":
                     st.success('File uploaded, chunked and embedded successfully.')
         if MODEL = "AlphaGPT":
             VARIANCE_LIST = ["SmartSaver","PerformancePlus"]
-            VARIANCE = st.selectbox('Select Variance :', VARIANCE_LIST)
+            VARIANCE = st.sidebar.selectbox('Select Variance :', VARIANCE_LIST)
             if VARIANCE ="SmartSaver":
                 model_name='gpt-3.5-turbo'
             if VARIANCE ="PerformancePlus":
                 model_name='gpt-4-1106-preview'
-            temperature = st.number_input('Temperature:', min_value=0.0, max_value=1.0,value=0.7,step=0.1, on_change=clear_history)
+            temperature = st.sidebar.number_input('Temperature:', min_value=0.0, max_value=1.0,value=0.7,step=0.1, on_change=clear_history)
 
     # Check if 'vs' exists in session state
     if 'vs' not in st.session_state:
