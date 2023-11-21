@@ -133,7 +133,7 @@ if __name__ == "__main__":
         api_key = st.text_input('OpenAI API Key:', type='password')
         if not api_key:
           st.warning("Please input your OpenAI API key.")
-        MODEL_LIST = ["AlphaGPT","gpt-3.5-turbo","gpt-4-1106-preview"]
+        MODEL_LIST = ["AlphaGPT","gpt-3.5-turbo-1106","gpt-4-1106-preview"]
         MODEL = st.selectbox('Select Model :', MODEL_LIST)
 
         if MODEL != "AlphaGPT":
@@ -178,7 +178,7 @@ if __name__ == "__main__":
             if VARIANCE =="SmartSaver":
                 model_name='gpt-3.5-turbo'
             if VARIANCE =="PerformancePlus":
-                model_name='gpt-4-1106-preview'
+                model_name='gpt-4'
             temperature = st.sidebar.number_input('Temperature:', min_value=0.0, max_value=1.0,value=0.7,step=0.1, on_change=clear_history)
 
     # Check if 'vs' exists in session state
