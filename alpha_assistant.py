@@ -199,9 +199,15 @@ if __name__ == "__main__":
         else:
             with st.spinner("Thinking..."):
                 db_chain = SQLDatabaseChain.from_llm(ChatOpenAI(openai_api_key=api_key,temperature=0.7, verbose=True,model_name='gpt-3.5-turbo'), db)
-                answer = db_chain.run(prompt)
-            if answer is None or not answer.strip():
-                st.warning("Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again.")
+                try:
+                    answer = db_chain.run(prompt)
+                except Exception as e:
+                    error_message = str(e)
+                    if 'Incorrect API key provided' in error_message:
+                        return 'Incorrect API key provided. You can find your API key at https://platform.openai.com/account/api-keys.'
+                    else:
+                        return "Sorry, this is out of my knowledge domain. Please shorten or rephrase the question to try again."
+                        raise
         st.session_state.messages.append({"role": "assistant", "content": answer})
         st.chat_message("assistant").write(answer)
         conversation_history={'datetime':current_datetime,'input':prompt,'response':answer}
