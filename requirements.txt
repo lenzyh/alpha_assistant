@@ -10,3 +10,4 @@ databricks-sql-connector
 pyspark
 pypdf
 langchain-experimental
+streamlit-aggrid
