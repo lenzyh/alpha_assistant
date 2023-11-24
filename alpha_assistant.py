@@ -12,7 +12,7 @@ from langchain.chat_models import ChatOpenAI
 
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 uri = (
-    "databricks://token:dapic3e9dd1a6924fd69f15dd90f6c9c35d6@dbc-eb788f31-6c73.cloud.databricks.com?"
+    "databricks://token:dapifcc863d2f28aa81ff5c627590f0b00b0@dbc-eb788f31-6c73.cloud.databricks.com?"
     "http_path=/sql/1.0/warehouses/21491dc99c22a788&catalog=alpha_assistant&schema=default"
 )
 db = SQLDatabase.from_uri(uri)
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         
         with sql.connect(server_hostname = "dbc-eb788f31-6c73.cloud.databricks.com",
                          http_path = "/sql/1.0/warehouses/21491dc99c22a788",
-                         access_token = "dapid039ed9f3529c6eaa50579c54a8d6814") as connection:
+                         access_token = "dapifcc863d2f28aa81ff5c627590f0b00b0") as connection:
         
           with connection.cursor() as cursor:
         
