@@ -12,8 +12,8 @@ from langchain.chat_models import ChatOpenAI
 
 st.set_page_config(page_title="Alpha Assistant", page_icon=":speech_balloon:")
 uri = (
-    "databricks://token:dapifcc863d2f28aa81ff5c627590f0b00b0@dbc-eb788f31-6c73.cloud.databricks.com?"
-    "http_path=/sql/1.0/warehouses/21491dc99c22a788&catalog=alpha_assistant&schema=default"
+    databrick_token,
+   path
 )
 db = SQLDatabase.from_uri(uri)
 
@@ -65,7 +65,7 @@ def insert_or_fetch_embeddings(index_name):
     
     embeddings = OpenAIEmbeddings(api_key=api_key)
     
-    pinecone.init(api_key='bcd7d6fc-9460-458f-aab5-7be1265596f5', environment='gcp-starter')
+    pinecone.init(api_key=openai_api_key, environment='gcp-starter')
     
     if index_name in pinecone.list_indexes():
         print(f'Index {index_name} already exists. Loading embeddings ... ', end='')
@@ -81,7 +81,7 @@ def insert_or_fetch_embeddings(index_name):
 
 def delete_pinecone_index(index_name='all'):
     import pinecone
-    pinecone.init(api_key='bcd7d6fc-9460-458f-aab5-7be1265596f5', environment='gcp-starter')
+    pinecone.init(api_key=pinecone_key, environment='gcp-starter')
 
     if index_name == 'all':
         indexes = pinecone.list_indexes()
